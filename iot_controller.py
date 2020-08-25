@@ -24,7 +24,7 @@ def customShadowCallback_Get(payload, responseStatus, token):
         payloadDict = json.loads(payload)
         print("~~~~~~~~~~~~~~~~~~~~~~~")
         print("Get request with token: " + token + " accepted!")
-        get_device_state()
+        set_device_state(payloadDict['state']['reported'])
     if responseStatus == "rejected":
         print("Get request " + token + " rejected!")
         print(json.loads(payload)['message'])
@@ -77,42 +77,58 @@ def customShadowCallback_Delete(payload, responseStatus, token):
         print(json.loads(payload)['message'])
 
 
-def get_device_state():
-    print('getting device state...')
-    pass
+def set_device_state(state_payload):
+    print('Setting Device State')
+    # Placeholder
+    aar = state_payload
+    # aar = {}
 
+    # EXECUTE DEVICE STATE UPDATES HERE
+    ###
+    ###
+    ### DO SOMETHING ###
+    ### aar['something'] = something_handler()
+    ###
+    ###
 
-def delta_handler(delta_state):
-    aar = {}
-
-    for k, v in delta_state.items():
-
-        '''
-        if k == 'something':
-            ### DO SOMETHING ###
-            aar['something'] = something_handler(v)
-        else:
-            print('Invalid input')
-        '''
-        pass
-
-        aar = delta_state
-    
     devShadow.shadowUpdate(
         json.dumps({'state': {'reported': aar}}),
         customShadowCallback_Update, 5)
 
 
+def delta_handler(delta):
+    # Placeholder
+    aar = delta
+    # aar = {}
+
+    for k, v in delta.items():
+
+        # EXECUTE DELTA ACTIONS HERE
+        ###
+        '''
+        if k == 'something':
+            ### DO SOMETHING ###
+            aar['something'] = delta_manager(k, v)
+        else:
+            print('Invalid input')
+        '''
+        ###
+
+    devShadow.shadowUpdate(
+        json.dumps({'state': {'reported': aar}}),
+        customShadowCallback_Update, 5)
+
+
+
+
 # -----------------------------------
 # IOT DEVICE CONFIGURATION
 # -----------------------------------
-
-
 def get_myShadowClient():
     # Get device configuration details
     with open('config.json', 'r') as cfg:
         device = json.load(cfg)
-    thing_uid = device['thing_uid']
+    thing_uid = device['uid']
 
     # Get keyfile paths
     key_dir = f'{os.getcwd()}/keys/'
@@ -146,18 +162,18 @@ def get_myShadowClient():
     myShadowClient.configureConnectDisconnectTimeout(10)  # 10 sec
     myShadowClient.configureMQTTOperationTimeout(5)  # 5 sec
 
-    print('shadow client configured')
+    print('Shadow Client Configured')
 
     myShadowClient.connect()
 
-    print('shadow client connected')
+    print('Shadow Client Connected')
     return myShadowClient, device
 
 
 def get_devShadow(myShadowClient, device):
     # Create a device shadow instance using persistent subscriptions
     devShadow = myShadowClient.createShadowHandlerWithName(
-        device['thing_uid', True)
+        device['uid'], True)
 
     # Shadow operations
     #devShadow.shadowGet(customShadowCallback_Get, 5)
@@ -166,7 +182,7 @@ def get_devShadow(myShadowClient, device):
     devShadow.shadowRegisterDeltaCallback(customShadowCallback_Delta)
     #devShadow.shadowUnregisterDeltaCallback()
 
-    print('shadow handler configured')
+    print('Shadow Handler Configured')
 
     return devShadow
 
@@ -175,7 +191,7 @@ def get_myMQTTClient(myShadowClient):
     # Create a device mqtt client instance
     myMQTTClient = myShadowClient.getMQTTConnection()
 
-    print('mqtt client connection active')
+    print('MQTT Client Connection Active')
 
     return myMQTTClient
 
@@ -207,7 +223,7 @@ init = {
     'time': f'{datetime.now()}'
 }
 dev_shadow['state']['reported'].update(init)
-dev_payload['uid'] = uid
+dev_payload['uid'] = device['uid']
 dev_payload.update(init)
 
 init_device_shadow(devShadow, dev_shadow)
