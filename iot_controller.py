@@ -151,12 +151,13 @@ def get_myShadowClient():
     myShadowClient.connect()
 
     print('shadow client connected')
-    return myShadowClient, thing_uid
+    return myShadowClient, device
 
 
-def get_devShadow(myShadowClient, uid):
+def get_devShadow(myShadowClient, device):
     # Create a device shadow instance using persistent subscriptions
-    devShadow = myShadowClient.createShadowHandlerWithName(uid, True)
+    devShadow = myShadowClient.createShadowHandlerWithName(
+        device['thing_uid', True)
 
     # Shadow operations
     #devShadow.shadowGet(customShadowCallback_Get, 5)
@@ -183,14 +184,14 @@ def init_device_shadow(devShadow, shadow):
     devShadow.shadowGet(customShadowCallback_Get, 5)
     sleep(5)
 
-def init_device_mqtt(devMQTT, payload):
-    devMQTT.subscribe('myTopic', 1, customMssgCallback)
+def init_device_mqtt(devMQTT, device, payload):
+    devMQTT.subscribe(device['sub_topic'], 1, customMssgCallback)
     sleep(0.1)
-    devMQTT.publish("myTopic", json.dumps(payload), 0)
+    devMQTT.publish(device['pub_topic'], json.dumps(payload), 0)
 
 
-myShadowClient, uid = get_myShadowClient()
-devShadow = get_devShadow(myShadowClient, uid)
+myShadowClient, device = get_myShadowClient()
+devShadow = get_devShadow(myShadowClient, device)
 devMQTTClient = get_myMQTTClient(myShadowClient)
 
 
@@ -210,4 +211,4 @@ dev_payload['uid'] = uid
 dev_payload.update(init)
 
 init_device_shadow(devShadow, dev_shadow)
-init_device_mqtt(devMQTTClient, dev_payload)  
+init_device_mqtt(devMQTTClient, device, dev_payload)  

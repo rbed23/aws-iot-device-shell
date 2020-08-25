@@ -1,5 +1,7 @@
 {
     "endpt": "<iot-endpoint-identifier>.iot.<aws-iot-region>.amazonaws.com", 
     "prt": "<port-number>",
-    "thing_uid": "your-iot-device-name"
+    "thing_uid": "your-iot-device-name",
+    "pub_topic": "myTopic",
+    "sub_topic": "myTopic"
 }
