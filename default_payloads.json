@@ -3,16 +3,14 @@
         "state": {
             "reported":{
                 "last_event": "",
-                "LED_main": "",
-                "LED_switch": "",
-                "property": "",
-                "state": "",
+                "ping": "",
+                "action": "",
                 "time": ""
             }
         }
     },
     "default_payload": {
-        "mssg": "",
+        "action": "",
         "ping": "",
         "time": "",
         "uid": ""

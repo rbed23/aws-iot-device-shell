@@ -6,112 +6,57 @@ from time import sleep, time
 import schedule
 
 from iot_controller import *
-from board_setup import *
 
 
-counter = 0
+alive_counter = 0
 
 
-def ping_status():
-    global counter
-    counter += 1
+def ping_state():
+    global alive_counter
+    alive_counter += 1
 
 
-def event_status(client, payload, shadow, report, sensor, event_type=""):
+def event_state(client, payload, shadow, report, event_type=""):
     if event_type == 'ping':
-        ping_status()
-        payload['mssg'] = 'pinging'
+        ping_state()
+        payload['action'] = 'pinging'
+        report['action'] = 'pinging'
 
-    global counter
+    global alive_counter
 
-    led_switch_state = 'on' if get_switch_state(sensor) == 1 else 'off'
     time = f'{datetime.now()}'
 
     payload['time'] = time
-    payload['ping'] = counter
-    payload['LED_switch'] = led_switch_state
+    payload['ping'] = alive_counter
     client.publish('myTopic', json.dumps(payload), 0)
 
-    report['time'] = time
-    report['property'] = counter
-    report['LED_switch'] = led_switch_state
-    shadow.shadowUpdate(format_shadow_report(report), customShadowCallback_Update, 5)
-
-
-def format_shadow_report(report):
-    tmp = {
-        'state': {
-            'reported': report
-        }
-    }
-    return json.dumps(tmp)
-
-
-def get_switch_state(sensor):
-    # Button == 0 if pressed
-    # Switch == 0 if 'off'
-
-    # Return True if powered
-    # else return False
-    return not sensor.value
+    report['state']['reported']['time'] = time
+    report['state']['reported']['ping'] = alive_counter
+    shadow.shadowUpdate(
+        json.dumps(report), 
+        customShadowCallback_Update, 5)
 
 
 def run_tgsn():
 
-    myDevice = iot_setup()
-
-    devShadow = myDevice[0]
-    devClient = myDevice[1]
-    devPayload = myDevice[2]
-
-    shadow_report = {'property': counter, 'state': 'pinging'}
-
     # Schedule Reporting Service(s)
-    schedule.every(10).seconds.do(event_status, devClient, devPayload, devShadow, shadow_report, sensor, 'ping')
+    schedule.every(10).seconds.do(event_state, devMQTTClient, dev_payload, devShadow, dev_shadow, 'ping')
 
-    # Initialize Sensor State
-    led_switch_state = get_switch_state(sensor)
-
-    shadow_report['LED_switch'] = 'on' if led_switch_state == 1 else 'off'
-    shadow_report['LED_main'] = 'on'
-    event_status(devClient, devPayload, devShadow, shadow_report, sensor)
 
     while True:
 
         # Run Scheduler(s)
         schedule.run_pending()
 
-        # Button Press Event
-        if button.is_pressed:
-            led_main.off()
+        # Event 1
+        '''
+        event_state(devClient, devPayload, devShadow, shadow_report)
+        '''
 
-            devPayload['mssg'] = 'button pressed'
-            shadow_report['last_event'] = 'button pressed'
-
-            event_status(devClient, devPayload, devShadow, shadow_report, sensor)
-
-            sleep(0.5)
-            led_main.on()
-
-        # Toggle LED Event
-        if get_switch_state(sensor) != led_switch_state:
-            print('toggled!')
-
-            devPayload['mssg'] = 'LED toggled'
-            shadow_report['last_event'] = 'LED toggled'
-            led_switch_state = get_switch_state(sensor)
-        
-            # Switch LED main
-            if led_switch_state == 1:
-                led_main.on()
-                shadow_report['LED_main'] = 'on'
-
-            else:
-                led_main.off()
-                shadow_report['LED_main'] = 'off'
-
-            event_status(devClient, devPayload, devShadow, shadow_report, sensor)
-
+        # Event 2
+        '''
+        event_state(devClient, devPayload, devShadow, shadow_report)
+        '''
         
         # Sleep
         sleep(0.1)

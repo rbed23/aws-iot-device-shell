@@ -6,8 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-gpiozero = "*"
 awsiotpythonsdk = "*"
+gpiozero = "*"
 schedule = "*"
 
 [requires]
