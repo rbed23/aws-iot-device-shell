@@ -22,13 +22,18 @@ Python Imports:
 3. create "keys/" folder in working directory
    1. `mkdir keys`
 4. move keyfiles into working directory under "keys/" folder
-   1. path/to/working/directory/**keys**
-5. rename keyfiles like:
+   1. `mv path/to/downloaded/keyfiles/**keyfile** path/to/working/directory/**keys**`
+5. rename keyfiles in the following format:
    1. RootCA.pem
    2. "AWS IOT Thing Name".crt
    3. "AWS IOT Thing Name".private.key
    4. "AWS IOT Thing Name".public.key
 6. run `python iot_device.py`
+
+
+## PLEASE NOTE ##
+
+When the program is launched, the programs digs into the **keys/** folder to 1. confirm and 2. load the keyfile paths as variables used to securely connect to your AWS IoT endpoint. If the keyfiles are not named appropriately, your program will not connect.
 
 With AWSIoTPythonSDK properly installed, and keyfiles properly renamed and moved to the **keys/** folder, you should have a device up and running with the following activity:
 
@@ -36,9 +41,9 @@ With AWSIoTPythonSDK properly installed, and keyfiles properly renamed and moved
     {
         "state": {
             "reported":{
+                "action": "",
                 "last_event": "",
                 "ping": "",
-                "action": "",
                 "time": ""
             }
         }
